@@ -122,7 +122,7 @@ public class JoinQuitManager implements Listener {
                 .orTimeout(redisChat.config.quitSendWaiting, TimeUnit.MILLISECONDS)
                 .exceptionally(onTimeout -> {    
                     //Timeout, player quit
-                	ChatMessage message = new ChatMessage(parsedQuitMessage, Permissions.JOIN_QUIT.getPermission();
+                	ChatMessage message = new ChatMessage(parsedQuitMessage, Permissions.JOIN_QUIT.getPermission());
                 	if(redisChat.config.enableQuitJoinMessages) {
                         redisChat.getDataManager().sendChatMessage(message);
                 	}
