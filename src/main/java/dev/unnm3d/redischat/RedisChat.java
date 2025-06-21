@@ -165,7 +165,7 @@ public final class RedisChat extends JavaPlugin {
         final TalkOnCommand talkOnCommand = new TalkOnCommand(this);
         loadCommand("talkon", talkOnCommand, talkOnCommand);
 
-        if (config.enableQuitJoinMessages) {
+        if (config.enableQuitJoinMessages || (config.spicord.enabled() && config.spicord.discordJoinsAndQuits())) {
             if (config.getDataType() == Config.DataType.REDIS) {
                 this.joinQuitManager = new JoinQuitManager(this);
                 getServer().getPluginManager().registerEvents(this.joinQuitManager, this);

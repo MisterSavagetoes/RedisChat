@@ -40,14 +40,23 @@ public class JoinQuitManager implements Listener {
 
 
         if (!joinEvent.getPlayer().hasPlayedBefore() && !redisChat.config.first_join_message.isEmpty()) {
-            redisChat.getDataManager().sendChatMessage(new ChatMessage(
+        	ChatMessage message = new ChatMessage(
                     MiniMessage.miniMessage().serialize(redisChat.getComponentProvider().parse(
                             joinEvent.getPlayer(),
                             redisChat.config.first_join_message,
                             true,
                             false,
                             false))
-            ));
+            );
+        	
+        	
+        	if(redisChat.config.enableQuitJoinMessages) {
+                redisChat.getDataManager().sendChatMessage(message);
+        	}
+            
+            if(redisChat.config.spicord.enabled() && redisChat.config.spicord.discordJoinsAndQuits()) {
+                redisChat.getDiscordHook().sendDiscordMessage(message);
+            }
             return;
         }
 
@@ -59,16 +68,24 @@ public class JoinQuitManager implements Listener {
             redisChat.getLogger().severe("You didn't set a join format for the player " + joinEvent.getPlayer().getName() + ". Check formats section inside config.yml file!");
             return;
         }
-
-        //Send join message to everyone
-        redisChat.getDataManager().sendChatMessage(new ChatMessage(
+        
+        ChatMessage message = new ChatMessage(
                 MiniMessage.miniMessage().serialize(redisChat.getComponentProvider().parse(
                         joinEvent.getPlayer(),
                         chatFormat.join_format(),
                         true,
                         false,
                         false)), Permissions.JOIN_QUIT.getPermission()
-        ));
+        );
+
+    	if(redisChat.config.enableQuitJoinMessages) {
+            //Send join message to everyone
+            redisChat.getDataManager().sendChatMessage(message);
+    	}
+        
+        if(redisChat.config.spicord.enabled() && redisChat.config.spicord.discordJoinsAndQuits()) {
+            redisChat.getDiscordHook().sendDiscordMessage(message);
+        }
 
     }
 
@@ -103,10 +120,16 @@ public class JoinQuitManager implements Listener {
         return new CompletableFuture<>()
                 .thenAccept(aVoid -> findPlayerRequests.remove(playerName)) //Remove from map, player rejoined
                 .orTimeout(redisChat.config.quitSendWaiting, TimeUnit.MILLISECONDS)
-                .exceptionally(onTimeout -> {                               //Timeout, player quit
-                    redisChat.getDataManager().sendChatMessage(
-                            new ChatMessage(parsedQuitMessage, Permissions.JOIN_QUIT.getPermission())
-                    );
+                .exceptionally(onTimeout -> {    
+                    //Timeout, player quit
+                	ChatMessage message = new ChatMessage(parsedQuitMessage, Permissions.JOIN_QUIT.getPermission();
+                	if(redisChat.config.enableQuitJoinMessages) {
+                        redisChat.getDataManager().sendChatMessage(message);
+                	}
+                    
+                    if(redisChat.config.spicord.enabled() && redisChat.config.spicord.discordJoinsAndQuits()) {
+                        redisChat.getDiscordHook().sendDiscordMessage(message);
+                    }
                     return null;
                 });
     }
